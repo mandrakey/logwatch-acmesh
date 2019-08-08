@@ -1,0 +1,75 @@
+#!/usr/bin/ruby
+
+# Copyright 2019 Maurice Bleuel <mandrakey@bleuelmedia.com>
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+
+# acmesh service script for logwatch in ruby.
+# Note: This is done quick'n'dirty so I have some log watching for certificate
+# activities using acme.sh. And yes, I used Ruby because Perl is something that
+# should effectively be banished from all history.
+
+# ==============================================================================
+# Globals
+
+RX_SUCCESS = /Cert success/
+RX_SUCCESS_LINE = /\[(.+)\].+Your cert is in .+\/(.+)\.cer/
+RX_ERROR = /\[(.+)\].+Error renew (.+)\./
+
+$successlist = []
+$errorlist = []
+
+# ==============================================================================
+# Functions
+
+def check_success(line)
+  m = RX_SUCCESS.match line
+  return if m == nil
+  
+  l = $stdin.readline
+  m = RX_SUCCESS_LINE.match l
+  
+  unless m == nil
+    $successlist << { :domain => m[2], :date => m[1] }
+  end
+end
+
+def check_error(line)
+  m = RX_ERROR.match line
+  return if m == nil
+  
+  $errorlist << { :domain => m[2], :date => m[1] }
+end
+
+# ==============================================================================
+# Processing
+
+$stdin.each do |line|
+  check_success line
+  check_error line
+end
+
+puts "Renewed certificates:"
+$successlist.each do |e|
+  puts "    #{e[:domain]} on #{e[:date]}"
+end
+
+puts "Failed renewals:"
+$errorlist.each do |e|
+  puts "    #{e[:domain]} on #{e[:date]}"
+end
