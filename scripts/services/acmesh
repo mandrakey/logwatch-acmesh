@@ -40,10 +40,10 @@ $errorlist = []
 def check_success(line)
   m = RX_SUCCESS.match line
   return if m == nil
-  
+
   l = $stdin.readline
   m = RX_SUCCESS_LINE.match l
-  
+
   unless m == nil
     $successlist << { :domain => m[2], :date => m[1] }
   end
@@ -52,7 +52,7 @@ end
 def check_error(line)
   m = RX_ERROR.match line
   return if m == nil
-  
+
   $errorlist << { :domain => m[2], :date => m[1] }
 end
 
@@ -64,12 +64,12 @@ $stdin.each do |line|
   check_error line
 end
 
-puts "Renewed certificates:"
+puts "Renewed certificates: #{$successlist.size}"
 $successlist.each do |e|
   puts "    #{e[:domain]} on #{e[:date]}"
 end
 
-puts "Failed renewals:"
+puts "Failed renewals: #{$errorlist.size}"
 $errorlist.each do |e|
   puts "    #{e[:domain]} on #{e[:date]}"
 end
