@@ -23,7 +23,7 @@ use Logwatch ':dates';
 
 my $Debug = $ENV{'LOGWATCH_DEBUG'} || 0;
 
-$SearchDate = TimeFilter('%a %b %e %H:%M:%S %Z %Y');
+$SearchDate = TimeFilter('%a %e %b %Y %H:%M:%S %p %Z');
 
 if ( $Debug > 5 ) {
    print STDERR "DEBUG: Inside ApplyAcmeshDate...\n";
